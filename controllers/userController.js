@@ -8,24 +8,27 @@ const userController = {
   // Get all users
   async getAllUsers(req, res) {
     try {
-      const users = await User.find();
-      res.json(users);
+      const users = await User.find({}, { _id: 0, __v: 0 });
+      res.status(200).json(users);
     } catch (err) {
-      res.status(500).json(err);
+      res.status(500).json({ Error: "Internal server error" });
     }
   },
 
   // Get a user by id
   async getUserById(req, res) {
     const id = req.params.id;
+    console.log(id);
+    console.log(typeof id);
     try {
-      const user = await User.findById(id);
+      // find user by id
+      const user = await User.findOne({ id: id }, { _id: 0, __v: 0 });
 
       if (!user) {
-        return res.status(404).json({ msg: "User not found" });
+        return res.status(404).json({ Error: "User not found" });
       }
 
-      res.json(user);
+      res.status(200).json(user);
     } catch (err) {
       res.status(500).json({ Error: "Internal server error" });
     }
@@ -48,7 +51,7 @@ const userController = {
       //   const user = db.users.find((user) => user.name === name);
 
       if (user) {
-        return res.status(400).json({ msg: "User already exists" });
+        return res.status(400).json({ Error: "User already exists" });
       }
 
       const newUser = new User({ name });
@@ -67,7 +70,7 @@ const userController = {
     const name = req.body.name;
 
     if (!name) {
-      return res.status(400).json({ msg: "Name is required" });
+      return res.status(400).json({ Error: "Name is required" });
     }
 
     if (typeof name !== "string") {
@@ -75,15 +78,22 @@ const userController = {
     }
 
     try {
+      // Check if user exists
+      const user = await User.findOne({ id: id });
+      if (!user) {
+        return res.status(404).json({ Error: "User not found" });
+      }
+
       // get user and update
-      const updatedUser = await User.findByIdAndUpdate(
-        id,
+      const updatedUser = await User.findOneAndUpdate(
+        { id: id },
         { name },
-        { new: true }
+        { new: true },
+        { _id: 0, __v: 0 }
       );
-      res.status(201).json(updatedUser);
+      res.status(200).json(updatedUser);
     } catch (err) {
-      res.status(500).json({ error: "User not found" });
+      res.status(500).json({ Error: "Internal Server Error" });
     }
   },
 
@@ -92,15 +102,15 @@ const userController = {
     const id = req.params.id;
     try {
       // const user = await User.findByIdAndDelete(id);
-      const user = await User.findOneAndDelete({ _id: id });
+      const user = await User.findOneAndDelete({ id: id });
 
       if (!user) {
-        return res.status(404).json({ msg: "User not found" });
+        return res.status(404).json({ Error: "User not found" });
       }
 
       res.json(user);
     } catch (err) {
-      res.status(500).json(err);
+      res.status(500).json({ Error: "Internal server error" });
     }
   },
 };

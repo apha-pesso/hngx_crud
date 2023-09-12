@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/test";
+const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/test123";
 
 mongoose.connect(uri, {
   useNewUrlParser: true,
